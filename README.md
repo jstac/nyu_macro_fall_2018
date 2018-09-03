@@ -1,3 +1,4 @@
+## ECON-GA 1025 -- Macroeconomic Theory I
 
 This is the public course page for the first half of ECON-GA 1025 – Macroeconomic Theory I
 
