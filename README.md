@@ -1,3 +1,4 @@
+
 ## ECON-GA 1025 -- Macroeconomic Theory I
 
 This is the public course page for the first half of ECON-GA 1025 – Macroeconomic Theory I
@@ -6,11 +7,17 @@ It will run over Sept 5 -- Oct 22 in the fall Semester of 2018
 
 ### Course notes
 
-* to be added
+* Download the whole repository or [click here](https://github.com/jstac/nyu_macro_fall_2018/blob/master/notes.pdf)
+
+(If you know how to use git then it might be best to clone the repo and then
+pull changes periodically.  If not then just follow the instructions above.)
+
+
 
 ### Other resources
 
 * [The QuantEcon lectures](https://lectures.quantecon.org/)
+
 
 ### Further reading
 
@@ -21,13 +28,6 @@ It will run over Sept 5 -- Oct 22 in the fall Semester of 2018
 
 ### Lecture slides and other material
 
-#### Week One
+See NYU Classes
 
-* Monday: Holiday, no lecture
-* Wednesday: TBA
-
-#### Week Two
-
-* Monday: TBA
-* Wednesday: TBA
 
