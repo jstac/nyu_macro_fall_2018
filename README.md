@@ -7,10 +7,11 @@ It will run over Sept 5 -- Oct 22 in the fall Semester of 2018
 
 ### Course notes
 
-* Download the whole repository or [click here](https://github.com/jstac/nyu_macro_fall_2018/blob/master/notes.pdf)
+* Download the whole repository or [click here](https://github.com/jstac/nyu_macro_fall_2018/raw/master/notes.pdf)
 
 (If you know how to use git then it might be best to clone the repo and then
 pull changes periodically.  If not then just follow the instructions above.)
+
 
 
 
