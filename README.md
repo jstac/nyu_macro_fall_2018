@@ -27,8 +27,12 @@ pull changes periodically.  If not then just follow the instructions above.)
 *Recursive Methods in Dynamic Economics* by Nancy Stokey and Robert E. Lucas, Harvard University Press, 1989
 
 
-### Lecture slides and other material
+### Assignments
 
 See NYU Classes
 
 
+### Lecture slides
+
+* [Lecture 1](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture1.pdf)
+* [Lecture 2](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture2.pdf)
