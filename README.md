@@ -41,3 +41,4 @@ See NYU Classes
 * [Lecture 5](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture5.pdf)
 * [Lecture 6](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture6.pdf)
 * [Lecture 7](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture7.pdf)
+* [Lecture 8](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture8.pdf)
