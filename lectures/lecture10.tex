@@ -1,0 +1,2202 @@
+\input{../preamb.tex}
+
+\subtitle{Lecture 10}
+
+\author{John Stachurski}
+
+
+\date{Fall Semester 2018}
+
+\begin{document}
+
+
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Today's Lecture}
+
+    \begin{itemize}
+        \item Quadratic optimization
+        \vspace{0.5em}
+        \vspace{0.5em}
+        \item Linear quadratic optimal control
+        \vspace{0.5em}
+        \vspace{0.5em}
+        \item Discrete dynamic programs
+    \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Congratulations to Paul Romer}
+
+    \begin{quote}
+        When I learned mathematical economics, a
+        different equilibrium prevailed. Not universally,
+        but much more so than today, when economic
+        theorists used math to explore abstractions,
+        it was a point of pride to do so with clarity,
+        precision, and rigor. -- \textsf{Romer, AER P\&P, 2015}
+	\end{quote}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Preliminary Discussion: Quadratic Optimization}
+    
+    Suppose we wish to solve 
+    %
+    \begin{equation*}
+        \label{eq:cqp}
+        v(x) = \min_{u \in \RR^m} \{ u'Qu + (Ax + Bu)'P(Ax + Bu)  \} 
+    \end{equation*}
+    %
+    where
+    %
+    \begin{itemize}
+        \item $P$ is symmetric, positive semidefinite and $n \times n$
+            \vspace{0.5em}
+        \item $Q$ is symmetric, positive definite and $m \times m$
+            \vspace{0.5em}
+        \item $A$ is $n \times n$ and $B$ is $n \times m$ 
+    \end{itemize}
+
+            \vspace{0.5em}
+            \vspace{0.5em}
+
+    \Ex Show that $Q + B'PB$ is nonsingular
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \textbf{Lemma}. The minimizer of $v$  is 
+    %
+    \begin{equation*}
+        u^* : = -(Q + B'PB)^{-1}B'PAx
+    \end{equation*}
+    %
+    and the minimized value $v$ satisfies
+    %
+    \begin{equation*}
+        \label{eq:vmv}
+        v(x) = x' M x 
+    \end{equation*}
+    %
+    where
+    %
+    \begin{equation*}
+        M := A'PA - A'PB(Q + B'PB)^{-1}B'PA
+    \end{equation*}
+
+    \Ex Confirm these claims using matrix algebra and the
+    following two facts from matrix calculus:
+    %
+    \begin{equation*}
+        \frac{\diff}{\diff u} a'u = a 
+        \quad \text{and} \quad
+        \frac{\diff}{\diff u} u' H u = (H + H')u
+    \end{equation*}
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    \frametitle{Linear Control Systems}
+
+    \navy{Linear quadratic dynamic programming problems} are those where
+
+    \begin{itemize}
+        \item the law of motion is \emp{linear}
+            \begin{itemize}
+                \item in state, control and shocks
+            \end{itemize}
+        \vspace{0.5em}
+        \item rewards are \emp{quadratic} 
+            \begin{itemize}
+                \item in state and controls
+            \end{itemize}
+    \end{itemize}
+    
+    Also called
+    %
+    \begin{itemize}
+        \item LQ control problems
+        \item linear regulator problems
+    \end{itemize}
+    
+
+\end{frame}
+
+
+\begin{frame}
+    
+    Costs: Assumptions are restrictive 
+    
+    Benefits: Tractable even in very high dimesions
+
+        \vspace{0.5em}
+    \Egs
+    %
+    \begin{itemize}
+        \item Optimal fiscal policy
+        \item monetary policy
+        \item energy policy
+        \item operations research 
+    \end{itemize}
+
+        \vspace{0.5em}
+    Refs:
+    %
+    \begin{itemize}
+        \item ``Recursive methods of dynamic linear economies.'' Hansen and
+            Sargent, Princeton UP, 2013
+    \end{itemize}
+
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    
+    Dynamics:
+    %
+    \begin{equation*}
+        \label{eq:lq_lom}
+        x_{t+1} = A x_t + B u_t + C \xi_{t+1}
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Here
+
+    \begin{itemize}
+        \item $x_0$ given
+        \vspace{0.5em}
+        \item $\{x_t\}$ takes values in $\RR^n$ 
+        \vspace{0.5em}
+        \item $\{u_t\}$ takes values in $\RR^m$
+        \vspace{0.5em}
+        \item  $A$ and $B$ are $n \times n$ and $n \times m$ respectively
+        \vspace{0.5em}
+        \item $C$ is $n \times j$ and $\{ \xi_t \}$ is {\sc iid} with $\EE \xi_t  = 0$ and $\EE \xi_t \xi_t' = I$
+    \end{itemize}
+
+
+\end{frame}
+
+
+
+\begin{frame}
+
+    \begin{figure}
+       \begin{center}
+       \begin{adjustbox}{max totalsize={.95\textwidth}{.8\textheight},center}
+        \input{../../tikz/lq_dynamics.tex}
+       \end{adjustbox}
+        \caption{\label{f:lq_dynamics} State dynamics for LQ control}
+       \end{center}
+    \end{figure}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \Eg Consider the law of motion for wealth 
+    %
+    \begin{equation*}
+        w_{t+1} = (1 + r) (w_t - c_t) + y_{t+1}
+    \end{equation*}
+    %
+
+
+    Assume that 
+    %
+        $$y_t = \mu + \sigma \xi_t \text{ where } \{\xi_t\} \iidsim N(0, 1)$$
+    %
+
+    Can we express this as
+    %
+        $$ x_{t+1} = A x_t + B u_t + C \xi_{t+1} ? $$
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+
+    One problem: $y_t$ is {\sc iid} but not zero mean
+
+
+\end{frame}
+
+
+\begin{frame}
+
+    Step 1: Let $u_t := c_t - \bar c$ where $\bar c =$ ``ideal'' level of consumption
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Then
+    %
+    \begin{equation*}
+        w_{t+1} = (1 + r) (w_t - u_t - \bar c) + \mu + \sigma \xi_{t+1} 
+    \end{equation*}
+    %
+
+
+        \vspace{0.5em}
+    is equal to the first row of
+    %
+    \begin{multline*}
+        \left(
+        \begin{array}{c}
+            w_{t+1} \\
+            1
+        \end{array}
+        \right)
+        =
+        \left(
+        \begin{array}{cc}
+            1 + r & -(1 + r) \bar c + \mu \\
+            0     & 1
+        \end{array}
+        \right)
+        \left(
+        \begin{array}{c}
+            w_t \\
+            1
+        \end{array}
+        \right)
+        \\
+        +
+        \left(
+        \begin{array}{c}
+            -(1 + r) \\
+            0
+        \end{array}
+        \right)
+            u_t
+            +
+        \left(
+        \begin{array}{c}
+        \sigma \\
+            0
+        \end{array}
+        \right)
+        \xi_{t+1}
+    \end{multline*}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    The linear specification is now complete
+
+    Set
+    %
+    \begin{equation*}
+        x_t := 
+        \begin{pmatrix}
+            w_t
+            \\
+            1
+        \end{pmatrix},
+        \qquad
+        A :=
+        \left(
+        \begin{array}{cc}
+            1 + r & -(1 + r) \bar c + \mu \\
+            0     & 1
+        \end{array}
+        \right),
+    \end{equation*}
+
+
+        \vspace{0.5em}
+    \begin{equation*}
+        B :=
+        \left(
+        \begin{array}{c}
+            -(1+r) \\
+            0
+        \end{array}
+        \right)
+        \quad \text{and } \;
+        C :=
+        \left(
+        \begin{array}{c}
+        \sigma \\
+            0
+        \end{array}
+        \right)
+    \end{equation*}
+
+    Then the first row of
+    %
+    \begin{equation*}
+        x_{t+1} = A x_t + B u_t + C \xi_{t+1}
+    \end{equation*}
+    %
+    is
+    %
+    \begin{equation*}
+        w_{t+1} = (1 + r) (w_t - u_t - \bar c) + \mu + \sigma \xi_{t+1} 
+    \end{equation*}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}
+    
+    In the LQ model we will aim to \emp{minimize} a flow of \emp{losses}
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Current loss given by 
+    %
+    \begin{equation*}
+        \ell(x_t, u_t) := x_t' R x_t + u_t' Q u_t
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+    Here 
+    %
+    \begin{itemize}
+        \item $R$ is $n \times n$, symmetric and positive semidefinite
+        \vspace{0.5em}
+        \item $Q$ is $m \times m$, symmetric and positive definite
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \Eg Consider the household with 
+    %
+    \begin{equation*}
+        \text{state } = x_t = 
+        \begin{pmatrix}
+            w_t
+            \\
+            1
+        \end{pmatrix},
+        \qquad
+        \text{control } = u_t = c_t - \bar c
+    \end{equation*}
+    
+    A typical choice of $R$ and $Q$ would be 
+    
+    %
+    \begin{equation*}
+        Q := 1
+        \quad \text{and} \quad
+        R :=
+        \left(
+        \begin{array}{cc}
+        0 & 0 \\
+        0 & 0
+        \end{array}
+        \right)
+    \end{equation*}
+    %
+
+
+    Then
+    %
+    \begin{equation*}
+        x_t' R x_t + u_t' Q u_t = u_t^2 = (c_t - \bar c)^2
+    \end{equation*}
+    %
+
+    \begin{itemize}
+        \item current loss for household $=$ squared deviation of consumption from ideal 
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Finite Horizon Optimality}
+
+    \emp{In}finite horizon problems
+    %
+    \begin{itemize}
+        \item technically challenging --- cannot use backward induction
+        \item but often neat because decisions are time invariant
+    \end{itemize}
+    
+        \vspace{0.5em}
+    Time matters little because agents always face an infinite future
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    But in some settings we specifically wish to inject time
+
+    Common \emp{finite horizon problems} include
+
+    \begin{itemize}
+        \item life cycle savings and consumption
+        \item retirement planning
+    \end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Finite Horizon Theory}
+    
+    Problem: choose $u_0, \ldots, u_{T-1}$ to minimize 
+
+    \begin{equation*}
+        \label{eq:lq_object}
+        \EE \,
+        \left\{
+            \sum_{t=0}^{T-1} \beta^t (x_t' R x_t + u_t' Q u_t) + \beta^T x_T' R_f x_T
+        \right\}
+    \end{equation*}
+    %
+    subject to 
+    %
+    \begin{equation*}
+        x_{t+1} = A x_t + B u_t + C \xi_{t+1}
+        \quad \text{at each } t
+    \end{equation*}
+    %
+    with $\beta \in (0, 1]$ 
+    
+    \begin{itemize}
+        \item $R_f$ is $n \times n$ and positive semidefinite
+        \vspace{0.5em}
+        \item Note $\beta = 1$ is permitted
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    To solve the finite horizon problem we use backwards induction
+
+    Let 
+    %
+    $$ J_T(x) := x' R_f x $$
+    %
+    
+    Controller at $T-1$ facing state $x_{T-1}$
+
+    \begin{itemize}
+        \item takes $x_{T-1}$ as given
+        \item solves
+            %
+            \begin{equation*}
+                \min_u 
+                \{
+                    x_{T-1}' R x_{T-1} + u' Q u + \beta \,
+                    \EE \, J_T(A x_{T-1} + B u + C \xi_T)
+                \}
+            \end{equation*}
+            %
+    \end{itemize}
+
+    Now let 
+    %
+    \begin{equation*}
+        \label{eq:lq_lsm}
+        J_{T-1} (x) :=
+        \min_u \{
+        x' R x + u' Q u + \beta \,
+        \EE J_T(A x + B u + C \xi_T)
+        \}
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    
+    Consider the decision problem at $T-2$
+    
+    We use $J_{T-1}(x)$ to summarize expected future loss associated with moving to state $x$
+
+    The controller chooses $u$ to trade off to solve
+    %
+    \begin{equation*}
+        \min_u
+        \{
+            x_{T-2}' R x_{T-2} + u' Q u + \beta \,
+            \EE J_{T-1}(Ax_{T-2} + B u + C \xi_{T-1})
+        \}
+    \end{equation*}
+    %
+
+    Let $J_{T-2}(x)$ be the minimum cost-to-go from state $x$:
+    %
+    \begin{equation*}
+        J_{T-2} (x)
+        = \min_u
+        \{
+        x' R x + u' Q u + \beta \,
+        \EE J_{T-1}(Ax + B u + C \xi_{T-1})
+        \}
+    \end{equation*}
+    %
+
+    The pattern for backwards induction is now clear... 
+
+\end{frame}
+
+
+\begin{frame}
+
+    Calculate the \navy{cost-to-go functions} $\{J_t\}$ recursively via
+    %
+    \begin{equation*}
+        J_{t-1} (x)
+        = \min_u
+        \{
+        x' R x + u' Q u + \beta \,
+        \EE J_{t}(Ax + B u + C \xi_t)
+        \}
+    \end{equation*}
+    %
+    and 
+    %
+    \begin{equation*}
+        J_T(x) = x' R_f x
+    \end{equation*}
+
+        \vspace{0.5em}
+    \begin{itemize}
+        \item a version of the \navy{Bellman equation}
+        \vspace{0.5em}
+        \item $J_t(x)$ represents total cost-to-go from time $t$ and state $x$ when the controller behaves optimally
+    \end{itemize}
+
+
+        \vspace{0.5em}
+    Minimizers at each stage are the optimal controls
+
+\end{frame}
+
+\begin{frame}
+    
+    Questions:  Given the structure of our model,
+    %
+    \begin{itemize}
+        \item is there a parsimonious way to represent $J_t$ at each $t$?
+        \vspace{0.5em}
+        \item is there a parsimonious way to represent the optimal choices?
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+
+    \textbf{Proposition.} Each $J_t$ has the form $J_t(x) = x' P_t x + d_t$ where
+    $P_t$ is $n \times n$ and $d_t$ is scalar 
+
+        \vspace{0.5em}
+    The sequence $\{P_t\}$ is defined recursively by
+    $P_T := R_f$ and
+    %
+    \begin{equation*}
+        P_{t-1} = R - \beta^2 A' P_t B (Q + \beta B' P_t B)^{-1} B'
+            P_t A + \beta A' P_t A
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+    The sequence $\{d_t\}$ is defined recursively by $d_T = 0$ 
+    and
+    %
+    \begin{equation*}
+        d_{t-1} = \beta (d_t + \trace(C' P_t C))
+    \end{equation*}
+
+        \vspace{0.5em}
+    The optimal controls are given by 
+    %
+    \begin{equation*}
+        u_{t-1}  = - F_t x_t
+        \quad \text{where} \quad
+        F_t := (Q + \beta B' P_t B)^{-1} \beta B' P_t A
+    \end{equation*}
+    
+\end{frame}
+
+
+\begin{frame}
+    
+    Proof is by induction
+
+    The claim is true at $t=T$ with $P_T = R_f$ and $d_T = 0$
+    
+        \vspace{0.5em}
+    Suppose now that it holds at some $t \leq T$
+    
+        \vspace{0.5em}
+    We then have, for arbitrary $x \in \RR^n$,
+    %
+    \begin{multline*}
+        J_{t-1} (x) =
+        \min_u 
+        \\
+        \{
+            x' R x + u' Q u + \beta \,
+            \EE (A x + B u + C \xi_t)' P_t (A x + B u + C \xi_t)
+            + \beta d_t
+        \}
+    \end{multline*}
+    %
+
+        \vspace{0.5em}
+    \Ex Show that the minimizer is
+    %
+    \begin{equation*}
+        u_{t-1}  = - (Q + \beta B' P_t B)^{-1} \beta B' P_t A x
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \Ex Show that
+
+    %
+    \begin{equation*}
+        J_{t-1} (x) = x' P_{t-1} x + d_{t-1}
+    \end{equation*}
+    %
+    where
+    %
+    \begin{equation*}
+        \label{eq:lq_finr}
+        P_{t-1} = R - \beta^2 A' P_t B (Q + \beta B' P_t B)^{-1} B' P_t A + \beta A' P_t A
+    \end{equation*}
+    %
+    and
+    %
+    \begin{equation*}
+        \label{eq:lq_finrd}
+        d_{t-1} = \beta (d_t + \trace(C' P_t C))
+    \end{equation*}
+    %
+
+
+\end{frame}
+
+
+
+\begin{frame}
+    
+    \begin{algorithm}[H]
+        $t \leftarrow T$ \;
+        $P_t \leftarrow R_f$ \;
+        $d_t \leftarrow 0$ \;
+        \While{$t > 0$}
+        {
+            $P_{t-1} \leftarrow R - \beta^2 A' P_t B (Q + \beta B' P_t B)^{-1} B'
+                P_t A + \beta A' P_t A$   \;
+            $d_{t-1} \leftarrow \beta (d_t + \trace(C' P_t C))$  \;
+            $t \leftarrow t-1$
+        }
+        \Return{$\{P_t, d_t\}_{t=0}^T$}
+        \caption{\label{algo:iterlq} Computing the cost-to-go in finite horizon LQ}
+    \end{algorithm}
+
+
+\end{frame}
+
+
+\begin{frame}
+
+    With 
+    %
+    \begin{equation*}
+        F_t := (Q + \beta B' P_{t+1} B)^{-1} \beta B' P_{t+1} A
+    \end{equation*}
+    %
+    we can simulate as follows
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    \begin{algorithm}[H]
+        $t \leftarrow 0$ \;
+        $x_t \leftarrow$ initial condition $x_0$ \;
+        \While{$t < T$}
+        {
+            $u_t \leftarrow - F_t x_t$    \;
+            $x_{t+1} \leftarrow A x_t + B u_t + C \xi_{t+1}$ \;
+            $t \leftarrow t+1$
+        }
+        \Return{$\{x_t, u_t\}_{t=0}^{T-1} \cup \{x_T\}$}
+        \caption{Simulate states and controls in finite horizon LQ}
+    \end{algorithm}
+
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    \frametitle{Example: Consumption Smoothing}
+    
+        \vspace{0.5em}
+    Early Keynesian models assumed that households have a constant marginal
+    propensity to consume from current income
+    
+        \vspace{0.5em}
+    Data contradicts this
+    
+    \begin{itemize}
+        \item ``Why is Consumption So Smooth?'' Campbell and Deaton, REStud (1989)
+    \end{itemize}
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Milton Friedman, Franco Modigliani and others built models based on
+    preference for smooth consumption stream 
+
+        \vspace{0.5em}
+    Let's investigate an LQ version
+
+\end{frame}
+
+
+
+\begin{frame}
+    
+    \Eg Recall the wealth dynamics
+    %
+    \begin{equation*}
+        w_{t+1} = (1 + r) (w_t - c_t) + \mu + \sigma \xi_{t+1}
+    \end{equation*}
+    %
+    expressed as
+    %
+    \begin{equation*}
+        x_{t+1} = A x_t + B u_t + C \xi_{t+1}
+    \end{equation*}
+
+    where 
+    %
+    \begin{equation*}
+        x_t := 
+        \begin{pmatrix}
+            w_t
+            \\
+            1
+        \end{pmatrix},
+        \qquad
+        A :=
+        \left(
+        \begin{array}{cc}
+            1 + r & -(1 + r) \bar c + \mu \\
+            0     & 1
+        \end{array}
+        \right),
+    \end{equation*}
+
+
+        \vspace{0.5em}
+    \begin{equation*}
+        u_t := c_t - \bar c,
+        \quad
+        B :=
+        \left(
+        \begin{array}{c}
+            -(1+r) \\
+            0
+        \end{array}
+        \right)
+        \quad \text{and } \;
+        C :=
+        \left(
+        \begin{array}{c}
+        \sigma \\
+            0
+        \end{array}
+        \right)
+    \end{equation*}
+
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    
+
+    The finite horizon objective is
+    %
+    \begin{equation*}
+        \label{eq:lq_pio}
+        \EE \,
+        \left\{
+            \sum_{t=0}^{T-1} \beta^t (c_t - \bar c)^2 + \beta^T q w_T^2
+        \right\}
+    \end{equation*}
+    %
+    where $q$ is a large positive constant
+    
+    \begin{itemize}
+        \item Why do we need it?
+    \end{itemize}
+
+    \Ex Pick $R$, $Q$ and $R_f$ to express this as
+    %
+    \begin{equation*}
+        \EE \,
+        \left\{
+            \sum_{t=0}^{T-1} \beta^t (x_t' R x_t + u_t' Q u_t) + \beta^T x_T' R_f x_T
+        \right\}
+    \end{equation*}
+
+\end{frame}
+
+
+
+
+
+\begin{frame}
+    
+    Set 
+    %
+    \begin{itemize}
+        \item $r = 0.05$ and $\beta = 1 / (1 + r)$
+        \item $\bar c = 2$,  $\mu = 1$, $\sigma = 0.25$ and $q = 10^6$
+        \item $T = 45$
+    \end{itemize}
+    
+    
+    Assume $\{\xi_t\} \iidsim N(0, 1)$
+
+        \vspace{0.5em}
+    \Ex Complete the following tasks by computer
+    %
+    \begin{enumerate}
+        \item Construct the correspond matrices $A$, $B$, $C$, $R$, $Q$
+        \vspace{0.5em}
+        \item Insert into the preceding algorithms
+        \vspace{0.5em}
+        \item Solve, simulate, plot income, consumption, wealth 
+    \end{enumerate}
+
+    Figure should be similar to the next slide
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \begin{figure}
+        \centering
+        \scalebox{0.5}{\includegraphics{lqcontrol1.png}}
+        \caption{\label{f:lqcontrol1} Consumption and income in the life cycle problem}
+    \end{figure}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \begin{figure}
+        \centering
+        \scalebox{0.5}{\includegraphics{lqcontrol2.png}}
+        \caption{\label{f:lqcontrol2} Consumption and wealth in the life cycle problem}
+    \end{figure}
+
+\end{frame}
+
+
+
+
+
+
+\begin{frame}
+    \frametitle{Infinite Horizons}
+    
+    Unchanged dynamics, objective function 
+    %
+    \begin{equation*}
+        \label{eq:lq_object_ih}
+        \EE \,
+        \left\{
+            \sum_{t=0}^{\infty} \beta^t (x_t' R x_t + u_t' Q u_t )
+        \right\}
+    \end{equation*}
+    %
+
+
+    Time dependence in $\{P_t\}$, $\{d_t\}$ and $\{F_t\}$ are replaced by
+
+    %
+    \begin{equation*}
+        P
+        = R - (\beta B' P A)' (Q + \beta B' P B)^{-1} (\beta B' P A)
+        + \beta A' P A
+    \end{equation*}
+    %
+
+    %
+    \begin{equation*}
+        F = (Q + \beta B' P B)^{-1} (\beta B' P A )
+    \end{equation*}
+    %
+
+    and
+    %
+    \begin{equation*}
+        d := \trace(C' P C) \frac{\beta}{1 - \beta}
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    
+    The expression
+    %
+    \begin{equation*}
+        P
+        = R - (\beta B' P A)' (Q + \beta B' P B)^{-1} (\beta B' P A)
+        + \beta A' P A
+    \end{equation*}
+    %
+    is called a \navy{discrete time algebraic Riccati equation}
+
+        \vspace{0.5em}
+    \begin{itemize}
+        \item is there a solution?
+        \vspace{0.5em}
+        \item is it unique?
+        \vspace{0.5em}
+        \item how can we compute it?
+    \end{itemize}
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+
+    Depends on ``controllability'' and ``observability'' (see course notes)
+    
+\end{frame}
+
+\begin{frame}
+    
+    Let 
+    %
+    \begin{itemize}
+        \item $\rR$ be the self-mapping on $\mM(n \times n)$ defined by
+            %
+            \begin{equation*}
+                \rR(P) := R - (\beta B' P A)' (Q + \beta B' P B)^{-1} (\beta B' P A) + \beta A' P A
+            \end{equation*}
+            %
+        \item $\mM_P$ be the set of positive definite matricies in $\mM(n \times n)$
+    \end{itemize}
+    
+        \vspace{0.5em}
+    
+
+    \textbf{Theorem.} If $(A, B)$ is controllable and $(A, R)$ is observable, then 
+    %
+    \begin{enumerate}
+        \item $(\mM_P, \rR)$ is globally stable
+        \item If $P^*$ is the unique fixed point of $\rR$ in $\mM_P$, then 
+            %
+            \begin{equation*}
+                u = -F^* x 
+                \; \text{ where } \;
+                F^* := (Q + \beta B' P^* B)^{-1} (\beta B' P^* A )
+            \end{equation*}
+           % 
+        is the unique optimal policy for the LQ model $(\beta, A, B, C, Q, R)$
+    \end{enumerate}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Example: Profit Maximization  with Adjustment Costs}
+    
+    A monopolist faces \emp{inverse demand function}
+    %
+    \begin{equation*}
+        p_t := p(q_t, z_t) = a_0 - a_1 q_t + z_t
+    \end{equation*}
+    %
+    where
+    
+    \begin{itemize}
+        \item $q_t$ is output
+        \item $p_t$ is price 
+        \item the demand shock $z_t$ follows
+            %
+            \begin{equation*}
+                z_{t+1} = \rho z_t + \sigma \eta_{t+1},
+                 \qquad   \{\eta_t \} \iidsim N(0, 1)
+            \end{equation*}
+            %
+    \end{itemize}
+    
+
+\end{frame}
+
+
+\begin{frame}
+    
+    The monopolist chooses $\{q_t\}$ to maximize PDV of profits:
+    %
+    \begin{equation*}
+        \EE \,
+            \sum_{t=0}^{\infty} \beta^t
+            \pi_t
+    \end{equation*}
+    %
+
+    Current profits are given by
+    %
+    \begin{equation*}
+        \pi_t := (p_t  - c) q_t - \gamma (q_{t+1} - q_t)^2
+    \end{equation*}
+    %
+    Here 
+    
+    \begin{itemize}
+        \item $\gamma (q_{t+1} - q_t)^2 =$ adjustment costs 
+        \item $\gamma \geq 0$ is a parameter
+        \item $c > 0$ is unit cost of current production
+        \item $0 < \beta < 1$ 
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    What would happen if $\gamma = 0$?
+        \vspace{0.5em}
+    
+    Monopolist should choose output to maximize current profit, implying 
+    %
+    \begin{equation*}
+        q_t = \bar q_t := \frac{a_0 - c + z_t}{2 a_1}
+    \end{equation*}
+    %
+
+
+    For other $\gamma$, we might expect that
+    %
+    \begin{itemize}
+        \item if $\gamma \approx 0$, then $q_t$ will track $\bar q_t$ closely
+        \vspace{0.5em}
+        \item if $\gamma$ is larger, then $q_t$ will be smoother than $\bar q_t$, as the monopolist seeks to avoid adjustment costs
+    \end{itemize}
+
+        \vspace{0.5em}
+    Let's see if this intuition is correct
+    
+\end{frame}
+
+
+\begin{frame}
+    
+    Step 1:  Formulate as a dynamic programming problem
+
+        \vspace{0.5em}
+    \begin{itemize}
+        \item State is $(q, z) \in \RR^2$
+        \vspace{0.5em}
+        \item Control is $q' = $ next period output
+    \end{itemize}
+    
+        \vspace{0.5em}
+    Bellman equation is
+    %
+    \begin{equation*}
+        v(q, z)
+        = \max_{q'}
+        \left\{
+            (p(q, z) - c)q - \gamma (q' - q)^2
+            + \beta \, \EE_z v(q', z')
+        \right\}
+    \end{equation*}
+
+
+        \vspace{0.5em}
+    There's an easy way to solve this...
+
+    ...\emp{if} we can rephrase as an LQ model
+
+\end{frame}
+
+
+
+
+\begin{frame}
+
+    
+    First we modify rewards of the firm to
+    %
+    \begin{equation*}
+        \EE \,
+            \sum_{t=0}^{\infty} \beta^t
+            (\pi_t  - a_1 \bar q_t^2)
+        \quad \text{where } \;
+        \bar q_t := \frac{a_0 - c + z_t}{2 a_1}
+    \end{equation*}
+    %
+
+    Changes lifetime value but 
+    %
+    \begin{equation*}
+        \EE \,
+            \sum_{t=0}^{\infty} \beta^t
+            (\pi_t  - a_1 \bar q_t^2)
+        =
+        \EE \, \sum_{t=0}^{\infty} \beta^t \pi_t  
+        - a_1 \EE \, \sum_{t=0}^{\infty} \beta^t \bar q_t^2
+    \end{equation*}
+
+    and last term does not depend on $\{q_t\}$
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Hence optimal production sequence $\{q_t\}$ will be identical
+
+\end{frame}
+
+
+\begin{frame}
+    
+    Next set 
+    %
+    $$u_t := q_{t+1} - q_t$$
+    %
+
+
+    \Ex Show that 
+    %
+    \begin{equation*}
+        \pi_t  - a_1 \bar q_t^2
+        = - a_1 (q_t - \bar q_t)^2 - \gamma u_t^2
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+    \begin{itemize}
+        \item Note this is quadratic in $(q_t, \bar q_t, u_t)$
+    \end{itemize}
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Switching to a minimization problem, current loss is 
+    %
+    \begin{equation*}
+        \ell_t := a_1 (q_t - \bar q_t)^2 + \gamma u_t^2
+    \end{equation*}
+
+\end{frame}
+
+\begin{frame}
+    
+
+    Next we set up dynamics as linear in state and control
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    With $m_0 := (a_0 - c) / 2a_1$ and $m_1 := 1 / 2 a_1$, we have
+    %
+    $$\bar q_t = m_0 + m_1 z_t$$
+
+    \Ex Show that
+    %
+    \begin{equation*}
+       \bar q_{t+1} = m_0 (1 - \rho) + \rho \bar q_t + m_1 \sigma \xi_{t+1}
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    By our definition of $u_t$, the dynamics of $q_t$ are 
+    %
+    $$
+        q_{t+1} = q_t + u_t
+    $$
+
+\end{frame}
+
+
+\begin{frame}
+    
+    With these observations we can write the dynamic component of the LQ system as
+    %
+    $$
+        x_{t+1} = A x_t + B u_t + C \xi_{t+1}
+    $$ 
+    when
+    %
+    $$
+        x_t := 
+        \begin{pmatrix}
+        \bar q_t \\
+        q_t \\ 
+        1
+        \end{pmatrix}
+    $$
+    %
+    and
+    %
+    $$
+    A =
+    \begin{pmatrix}
+        \rho & 0 & m_0 (1 - \rho)
+        \\
+        0 & 1 &         0
+        \\
+        0 & 0 &         1
+    \end{pmatrix},
+    \quad
+    B =
+    \begin{pmatrix}
+        0
+        \\
+        1
+        \\
+        0
+    \end{pmatrix}
+    \quad \text{and} \quad
+    C =
+    \begin{pmatrix}
+    m_1 \sigma
+    \\
+     0
+     \\
+     0
+    \end{pmatrix}
+    $$
+   
+
+    \Ex Check it
+
+\end{frame}
+
+
+
+\begin{frame}
+    
+    Recall our intuition: 
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    if $\gamma = 0$, then monopolist should set
+    %
+    \begin{equation*}
+        q_t = \bar q_t \text{ for all } t
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+        \vspace{0.5em}
+    For other $\gamma$, we expect that
+    %
+    \begin{itemize}
+        \item if $\gamma$ close to zero $\implies$ $q_t$ will track $\bar q_t$ closely
+        \vspace{0.5em}
+        \item if $\gamma$ is larger, then $q_t$ will be smoother 
+    \end{itemize}
+
+
+\end{frame}
+
+
+
+\begin{frame}
+    
+    \begin{figure}
+       \centering
+       \scalebox{0.4}{\includegraphics{../../figures/monopolist_adj_costs_1.png}}
+       \caption{\label{f:monopolist_adj_costs_1} Output with adjustment costs when $\gamma = 2$}
+    \end{figure}
+
+
+\end{frame}
+
+\begin{frame}
+    
+    \begin{figure}
+       \centering
+       \scalebox{0.4}{\includegraphics{../../figures/monopolist_adj_costs_2.png}}
+       \caption{\label{f:monopolist_adj_costs_2} Output with adjustment costs when $\gamma = 10$}
+    \end{figure}
+
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Finite State Markov Decision Problems}
+
+    Let $\XX$ and $\AA$ be finite, $\Gamma(x) \subset \AA$ at each $x \in \XX$
+
+    A \navy{stochastic kernel} from 
+    %
+    $$ \GG := \setntn{(x, a) \in \XX \times \AA}{a \in \Gamma(x)} $$
+    %
+    to $\XX$ is a family of distributions $\Pi(x, a, \cdot)$ over $\XX$, one for each $(x, a)$ in $\GG$
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+    \Eg
+    % 
+    \begin{itemize}
+        \item $\XX =$ inventory levels for a firm, $\AA = \{\text{order stock}, \text{don't order}\}$
+        \item $\Pi(x, a, \cdot)$ is a distribution for next period inventory given current state and action
+    \end{itemize}
+
+\end{frame}
+
+
+
+
+\begin{frame}
+
+    A \navy{finite state Markov decision process (MDP)} consists of 
+    %
+    \begin{enumerate}
+        \item a nonempty finite set $\XX$ called the \navy{state
+            space},
+        \vspace{0.2em}
+        \item a nonempty finite set $\AA$ called the \navy{action
+            space},
+        \vspace{0.2em}
+        \item a \navy{feasible correspondence}
+            $\Gamma$ from $\XX \to \AA$,
+        \vspace{0.2em}
+        \item a \navy{reward function} $r \colon \GG \to \RR$, where
+            %
+            \begin{equation*}
+                \GG := \setntn{(x, a) \in \XX \times \AA}{a \in \Gamma(x)}
+            \end{equation*}
+            %
+        \item a \navy{discount factor} $\beta \in (0, 1)$ and
+        \vspace{0.2em}
+        \item a \navy{stochastic kernel} $\Pi$ from $\GG$ to $\XX$ 
+    \end{enumerate}
+
+        \vspace{0.5em}
+        The set $\GG$ is called the set of \navy{feasible state-action pairs}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    An informal algorithm illustrating dynamics and reward flow:
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    \begin{algorithm}[H]
+      set $t \leftarrow 0$ and take input $x_0$ \;
+      \While{$t < \infty$}
+      {
+          controller observes $x_t$   \;
+          chooses action $a_t$    \;
+          receives $r(x_t, a_t)$   \;
+          nature draws $x_{t+1}$ from $\Pi(x_t, a_t, \cdot)$   \;
+          $t  \leftarrow  t + 1$ \;
+      }
+      %\caption{\label{algo:d_mdp} State, actions and rewards}
+    \end{algorithm}
+
+\end{frame}
+
+
+
+
+\begin{frame}
+    
+    Objective: choose a \navy{state-contingent} action path $\{a_t\}$ that maximizes
+    %
+    \begin{equation*}
+        \label{eq:dmdp_ob}
+        \EE \sum_{t \geq 0} \beta^t r(x_t, a_t)
+    \end{equation*}
+    %
+
+    \begin{itemize}
+        \item State contingency means that $a_t$ is chosen contingent on current state $x_t$
+        \vspace{0.5em}
+        \item Mathematically, $a_t$ is a (policy) function of $x_t$
+    \end{itemize}
+
+        \vspace{0.5em}
+    The set of \navy{feasible policies} is
+    %
+    \begin{equation*}
+        \label{eq:dmdp_fp}
+        \Sigma := 
+        \setntn{\sigma \in \AA^\XX}{\sigma(x) \in \Gamma(x) \text{ for all } x \in \XX}
+    \end{equation*}
+    %
+
+    Interpretation: Choosing $\sigma$ from $\Sigma$ means
+    we respond to state $x_t$ with action $a_t := \sigma(x_t)$ at every $t$
+
+\end{frame}
+
+
+
+\begin{frame}
+    
+    If we commit to $\sigma$ in $\Sigma$ 
+    then $x_{t+1}$ is drawn from $\Pi(x_t, \sigma(x_t), \cdot)$ at every $t$
+
+    Given $x_0 = x$, this is an $(x, \Pi_\sigma)$-chain for $\Pi_\sigma$ defined by
+    %
+    \begin{equation*}
+        \Pi_\sigma(x, y) := \Pi(x, \sigma(x), y)
+        \qquad (x, y \in \XX)
+    \end{equation*}
+    %
+
+    Rewards at each point in time are $r(x_t, a_t) = r(x_t, \sigma(x_t))$
+    
+        \vspace{0.5em}
+    Let
+    %
+    \begin{equation*}
+        r_\sigma(x) := r(x, \sigma(x))
+    \end{equation*}
+    %
+
+    Now
+    %
+    \begin{equation*}
+        \EE [ r(x_t, a_t) \given x_0 = x]
+        = \EE [ r_\sigma(x_t)  \given x_0 = x]
+        = \Pi_\sigma^t r_\sigma (x)
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    
+    The lifetime value of following $\sigma$ starting from state $x$ can now be written as
+    %
+    \begin{align*}
+        v_\sigma (x) 
+        & =
+        \EE \left[ 
+            \sum_{t \geq 0} \beta^t
+            r(x_t, \sigma(x_t)) 
+            \given x_0 = x
+            \right]
+            \\
+        & =
+        \sum_{t \geq 0} \beta^t
+        \EE \left[ 
+            r(x_t, \sigma(x_t)) 
+            \given x_0 = x
+            \right]
+            \\
+        & = \sum_{t \geq 0} \beta^t (\Pi_\sigma r_\sigma)(x)
+    \end{align*}
+    %
+
+
+    In vector notation with $v_\sigma$ and $r_\sigma$ viewed as column
+    vectors, this is
+    %
+    \begin{equation*}
+        \label{eq:vsigdc}
+        v_\sigma = \sum_{t \geq 0} \beta^t \Pi_\sigma^t r_\sigma
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Optimality}
+    
+    The \navy{value function} is defined as 
+    %
+    \begin{equation*}
+        v^*(x) := \sup_{\sigma \in \Sigma} v_\sigma(x)
+        \qquad (x \in \XX)
+    \end{equation*}
+    %
+
+    \begin{itemize}
+        \item The maximal lifetime value we can extract from each state
+        \vspace{0.5em}
+        \item consistent with previous usage of the term ``value function''  
+    \end{itemize}
+    
+        \vspace{0.5em}
+        \vspace{0.5em}
+
+    A policy $\sigma \in \Sigma$ is called \navy{optimal} if $v_\sigma = v^*$
+    
+    \begin{itemize}
+        \item Attains the supremum at all states
+    \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \textbf{Proposition.} $v^*$ satisfies the Bellman equation
+    %
+    \begin{equation*}
+        v^*(x)
+        = \max_{a \in \Gamma(x)}
+        \left\{
+            r(x, a)
+            + \beta
+            \sum_{y \in \XX} v^*(y) \Pi(x, a, y)
+        \right\}
+    \end{equation*}
+    %
+    at every $x \in \XX$
+    
+        \vspace{0.5em}
+    Moreover, $\sigma \in \Sigma$ is optimal if and only 
+    %
+    \begin{equation*}
+        \label{eq:ncdmc}
+        \sigma(x)
+        \in \argmax_{a \in \Gamma(x)}
+        \left\{
+            r(x, a)
+            + \beta
+            \sum_{y \in \XX} v^*(y) \Pi(x, a, y)
+        \right\}
+    \end{equation*}
+    %
+    at every $x \in \XX$ and at least one such policy exists
+
+
+        \vspace{0.5em}
+    Proof: Coming soon
+
+\end{frame}
+
+
+\begin{frame}
+    
+    The statement that a feasible policy $\sigma$ is optimal if and only 
+    %
+    \begin{equation*}
+        \sigma(x)
+        \in \argmax_{a \in \Gamma(x)}
+        \left\{
+            r(x, a)
+            + \beta
+            \sum_{y \in \XX} v^*(y) \Pi(x, a, y)
+        \right\}
+    \end{equation*}
+    %
+    at every $x \in \XX$ is called \navy{Bellman's principle of optimality}
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Given arbitrary $v \in \RR^\XX$, we say that $\sigma$ is 
+    \navy{$v$-greedy} if
+    %
+    \begin{equation*}
+        \sigma(x)
+        \in \argmax_{a \in \Gamma(x)}
+        \left\{
+            r(x, a)
+            + \beta
+            \sum_{y \in \XX} v(y) \Pi(x, a, y)
+        \right\}
+        \qquad \forall \, x \in \XX
+    \end{equation*}
+    %
+
+    For $\sigma \in \Sigma$, Bellman's principle of optimality becomes: 
+    %
+    \begin{equation*}
+        \sigma \text{ is optimal }
+        \iff
+        \sigma \text{ is $v^*$-greedy }
+    \end{equation*}
+
+\end{frame}
+
+\begin{frame}
+    
+
+    If we can compute $v^*$ then the rest is easy
+        \vspace{0.5em}
+
+    To do so we use the Bellman operator
+    %
+    \begin{equation*}
+        Tv(x)
+        = \max_{a \in \Gamma(x)}
+        \left\{
+            r(x, a)
+            + \beta
+            \sum_{y \in \XX} v(y) \Pi(x, a, y)
+        \right\}
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    \textbf{Proposition.}  Under the stated assumptions,
+    %
+    \begin{enumerate}
+        \item $T$ is a contraction of modulus $\beta$ on $(\RR^\XX, d_\infty)$
+        \vspace{0.5em}
+        \item The unique fixed point of $T$ in $\RR^\XX$ is $v^*$
+    \end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}
+    
+    To prove that $T$ is a contraction we can use the following
+
+    \textbf{Lemma.} If $E$ is any set and $f, g \in b E$, then
+    %
+    \begin{equation*}
+        |\sup_{a \in E} f(a) - \sup_{a \in E} g(a) |
+        \leq \sup_{a \in E} | f(a) - g(a) |
+    \end{equation*}
+    %
+
+    Proof:  If $f$ and $g$ have the stated properties, then
+    %
+    \begin{equation*}
+        f = f - g + g \leq |f - g | + g
+    \end{equation*}
+    %
+
+    \vspace{-1em}
+    \begin{equation*}
+        \fore
+        \sup f \leq  \sup |f - g | +  \sup g
+    \end{equation*}
+    %
+
+    \begin{equation*}
+        \fore
+        \sup f - \sup g \leq  \sup |f - g | 
+    \end{equation*}
+
+    Reversing the roles of $f$ and $g$ completes the proof
+
+\end{frame}
+
+
+
+
+
+\begin{frame}
+    
+    Now we show that $T$ is a contraction of modulus $\beta$ on $\RR^\XX$
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    For any $v, w$ in $\RR^\XX$ and $x \in \XX$ we have
+    %
+    \begin{align*}
+        |T v(x)| -T w(x)|
+        & \leq
+        \beta \,
+        \max_{a \in \Gamma(x)}
+        \left| 
+        \sum_y \Pi(x, a, y) [ v(y) -  w(y)]
+        \right|
+        \\
+        & \leq 
+        \sum_y \Pi(x, a, y)
+        \beta \,
+        \left| 
+             v(y) -  w(y)
+        \right|
+        \\
+        & \leq \beta \| v - w\|_\infty
+    \end{align*}
+    %
+
+    Taking the supremum over all $x \in \XX$ yields the desired result
+
+
+\end{frame}
+
+\begin{frame}
+    
+    \begin{algorithm}[H]
+        input $v_0 \in \RR^\XX$, an initial guess of $v^*$ \;
+        input $\tau$, a tolerance level for error \;
+        $\epsilon \leftarrow  \tau + 1$ \;
+        $n \leftarrow  0$ \;
+        \While{$\epsilon > \tau $}
+        {
+            \For{$x \in \XX$}
+            {
+                $v_{n+1}(x) \leftarrow Tv_n(x)$ \;
+            }
+            $\epsilon \leftarrow \| v_n - v_{n+1} \|_\infty$ \;
+            $n \leftarrow n + 1$ \;
+        }
+        \Return{$v_n$}
+        \caption{\label{algo:fsvfi} Value function iteration (finite state space)}
+    \end{algorithm}
+
+\end{frame}
+
+
+\begin{frame}
+
+    An alternative algorithm:
+
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    
+    \begin{algorithm}[H]
+        input $\sigma_0 \in \Sigma$, an initial guess of $\sigma^*$ \;
+        $n \leftarrow  0$ \;
+        $\epsilon \leftarrow  1$ \;
+        \While{$\epsilon > 0 $}
+        {
+            $v_n \leftarrow $ the $\sigma_n$-value function $\sum_{t \geq 0}
+                \beta^t \Pi_{\sigma_n}^t r_{\sigma_n}$ \;
+            $\sigma_{n+1} \leftarrow $ the $v_n$ greedy policy \;
+            $\epsilon \leftarrow \| \sigma_n - \sigma_{n+1} \|_\infty$ \;
+            $n \leftarrow n + 1$ \;
+        }
+        \Return{$\sigma_n$}
+        \caption{\label{algo:fshpi} Howard's policy iteration algorithm}
+    \end{algorithm}
+
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \Fact When $\XX$ is finite, $\{\sigma_n\}$ converges to the exact optimal policy in a
+    finite number of steps
+
+        \vspace{0.5em}
+    Proofs can be found in 
+    %
+    \begin{itemize}
+        \item ``Markov Decision Processes.'' Puterman (Wiley, 2005)
+        \vspace{0.5em}
+        \item ``Economic Dynamics: Theory and Computation.'' Stachurski (MIT
+            Press, 2009)
+    \end{itemize}
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+    Intuition: $v_{n+1}(x) - v_n(x) > 0$ at some $x \in \XX$ when $\sigma_n$ is not optimal
+    
+    Thus, the sequence $\{\sigma_n\}$ generated by the algorithm does not cycle
+      
+    Since $\Sigma$ is finite, eventual convergence is guaranteed
+
+\end{frame}
+
+
+\begin{frame}
+    
+    One step in Howard's PI algorithm is computing $v_\sigma$ given $\sigma$
+    
+    We could do this by truncating: With $T$ large,  
+    %
+    \begin{equation*}
+        \label{eq:vsigdct}
+        v_\sigma \approx \sum_{t = 0}^T \beta^t \Pi_\sigma^t r_\sigma
+    \end{equation*}
+    %
+
+    Another way to compute $v_\sigma$ is by making use of the operator $T_\sigma$ defined
+    at $v \in \RR^\XX$ by
+    %
+    \begin{equation*}
+        T_\sigma v (x)
+        =
+            r(x, \sigma(x))
+            + \beta
+            \sum_{y \in \XX} v(y) \Pi(x, \sigma(x), y)
+        \end{equation*}
+    %
+
+    or, in vector notation,
+    %
+    \begin{equation*}
+        T_\sigma v 
+        = r_\sigma + \beta \Pi_\sigma v
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+\begin{frame}
+    
+    \textbf{Lemma.} For any given $\sigma$ in $\Sigma$,
+    %
+    \begin{enumerate}
+        \item the $\sigma$-value function $v_\sigma$ is the unique fixed point of $T_\sigma$ in $\RR^\XX$
+        \item Moreover, $T_\sigma^n v \to v_\sigma$ as $n \to \infty$ for all $v \in \RR^\XX$
+    \end{enumerate}
+    
+    Proof: For fixed $\sigma$ in $\Sigma$ we have
+    %
+    \begin{align*}
+        T_\sigma v_\sigma
+        & = r_\sigma +
+        \beta \Pi_\sigma 
+        \left(
+            \sum_{t \geq 0} \beta^t \Pi^t_\sigma r_\sigma
+        \right)
+        \\
+        & = r_\sigma +
+        \left(
+            \sum_{t \geq 1} \beta^t \Pi^t_\sigma r_\sigma
+        \right)
+        = \sum_{t \geq 0} \beta^t \Pi^t_\sigma r_\sigma
+    \end{align*}
+
+    In other words, $T_\sigma v_\sigma = v_\sigma$
+
+\end{frame}
+
+
+\begin{frame}
+    
+    Moreover, $T_\sigma$ is a contraction of modulus $\beta$ on $\RR^\XX$
+
+    Indeed, for any $v, w$ in $\RR^\XX$ we have
+    %
+    \begin{align*}
+        |T_\sigma v(x)| -T_\sigma w(x)|
+        & =
+        \beta \,
+        \left| 
+        \sum_y \Pi(x, \sigma(x), y) [ v(y) -  w(y)]
+        \right|
+        \\
+        & \leq 
+        \sum_y \Pi(x, \sigma(x), y)
+        \beta \,
+        \left| 
+             v(y) -  w(y)
+        \right|
+        \\
+        & \leq \beta \| v - w\|_\infty
+    \end{align*}
+    %
+
+    Taking the supremum over all $x \in \XX$ yields the desired result
+
+    This establishes all claims in the lemma
+
+\end{frame}
+
+
+\begin{frame}
+    
+    Alternatively, we can use the Neumann series theorem 
+    
+    In particular, the linear system
+    %
+    \begin{equation*}
+        v = r_\sigma + \beta \, \Pi_\sigma v
+    \end{equation*}
+    %
+    has the unique solution
+    %
+    \begin{equation*}
+        \label{eq:yavs}
+        v_\sigma 
+        = \sum_{t \geq 0} \beta^t \Pi_\sigma^t r_\sigma
+        = (I - \beta \, \Pi_\sigma)^{-1} r_\sigma
+    \end{equation*}
+    %
+    whenever the spectral radius of $\beta \, \Pi_\sigma$ is less than one
+
+    \begin{itemize}
+        \item This is always true (why?)
+        \item matrix inversion approach which works well when $\XX$ is not large
+    \end{itemize}
+    
+
+
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{An Inventory Problem}
+
+    Previously we studied a firm whose inventory behavior followed $(s,S)$ dynamics
+    
+    \begin{itemize}
+        \item large, infrequent orders
+    \end{itemize}
+
+    Can we replicate this in an optimizing model?
+
+    Inventory for the firm obeys
+    %
+    \begin{equation*}
+        \label{eq:i_lom}
+        i_{t+1} = (i_t - D_{t+1})_+ + S a_t
+    \end{equation*}
+    %
+
+    Here 
+    %
+    \begin{itemize}
+        \item $\{D_t\}$ is a  demand shock and $t_+ := \max\{t, 0\}$
+        \item action $a_t \in \{0, 1\}$
+    \end{itemize}
+    
+
+
+\end{frame}
+
+
+\begin{frame}
+
+    State is $x = i = $ level of inventory
+    
+    \vspace{1.0em}
+    The firm can stock at most $kS$ items at one time, so
+    %
+    \begin{equation*}
+        \Gamma(x) = 
+        \begin{cases}
+            \{0, 1\} & \text{if } x \leq (k-1)S
+            \\
+            \{0\} & \text{otherwise } 
+        \end{cases}
+    \end{equation*}
+    %
+    \vspace{-1.0em}
+    \begin{itemize}
+        \item feasible choices for $a_t$ when current state is $x$
+    \end{itemize}
+
+    \vspace{0.5em}
+    Assume {\sc iid} demand shocks with common {\sc pmf} $\phi$
+    on $\{0, 1, \ldots\}$
+
+    \vspace{0.5em}
+    The stochastic kernel $\Pi$ is given by 
+    %
+    \begin{align*}
+        \Pi(x, a, y) 
+        & = \PP \{ (x - D_{t+1})_+ + S a = y \}
+        \\
+        & = \sum_{d \geq 0} \1 \{ (x - d)_+ + S a = y \} \phi(d)
+    \end{align*}
+
+
+\end{frame}
+
+\begin{frame}
+    
+    Assuming a unit markup, profits are
+    %
+    \begin{equation*}
+        \EE \sum_{t \geq 0} \beta^t \pi_t
+        \qquad \text{where } \pi_t := i_t \wedge D_{t+1} - c a_t
+    \end{equation*}
+    %
+
+    \begin{itemize}
+        \item $c$ is a fixed cost of ordering inventory  
+        \item orders in excess of inventory are lost rather than backfilled
+    \end{itemize}
+
+
+        \vspace{0.5em}
+    Bellman equation:
+    %
+    \begin{equation*}
+        v(x)
+        = \max_{a \in \Gamma(x)} \left\{
+            \sum_{d } (x \wedge d) \phi(d)
+            - c a
+            + \beta
+            \sum_{d } v((x - d)_+ + Sa) \phi(d)
+        \right\}
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+    Here $x$ in $\XX := \{0, 1, \ldots kS \}$
+    
+    
+\end{frame}
+
+
+
+
+\begin{frame}
+    
+    Finite state MDP theory implies that $v^*$ satisfies the Bellman equation
+    %
+    \begin{equation*}
+        v^*(x)
+        = \max_{a \in \Gamma(x)} 
+        \left\{
+            \sum_{d } (x \wedge d)\phi(d)
+            - c a
+            + \beta
+            \sum_{d } v^*((x - d)_+ + Sa) \phi(d)
+        \right\}
+    \end{equation*}
+    %
+    at every $x \in \XX$
+    
+    Moreover, a feasible policy $\sigma$ is optimal if and only 
+    %
+    \vspace{-1.5em}
+    \begin{multline*}
+        \sigma(x)
+        \in \argmax_{a \in \Gamma(x)}
+        \\
+        \left\{
+            \sum_{d } (x \wedge d) \phi(d)
+            - c a
+            + \beta
+            \sum_{d } v^*((x - d)_+ + Sa) \phi(d)
+        \right\}
+    \end{multline*}
+    %
+    at every $x \in \XX$ and at least one such policy exists
+
+
+\end{frame}
+
+
+\begin{frame}
+    
+    We can solve this problem by value function iteration
+    
+        \vspace{0.5em}
+    The Bellman operator in this context is 
+    %
+    \begin{equation*}
+        Tv(x)
+        = \max_{a \in \Gamma(x)} \left\{
+            \sum_{d } (x \wedge d) \phi(d)
+            - c a
+            + \beta
+            \sum_{d } v((x - d)_+ + Sa) \phi(d)
+        \right\}
+    \end{equation*}
+    %
+
+        \vspace{0.5em}
+        \vspace{0.5em}
+        \vspace{0.5em}
+    From the theory of finite state MDPs we know that 
+    %
+    \begin{itemize}
+        \item $T$ is a contraction of modulus $\beta$ on $(\RR^\XX, d_\infty)$
+        \vspace{0.5em}
+        \item Its unique fixed point in $\RR^\XX$ is $v^*$
+    \end{itemize}
+    
+    
+\end{frame}
+
+
+\begin{frame}
+
+    \Ex Using the bound
+    %
+    \begin{equation*}
+        |\sup_{a \in D} f(a) - \sup_{a \in D} g(a) |
+            \leq \sup_{a \in D} | f(a) - g(a) |
+    \end{equation*}
+    %
+    show directly that, for any $v, w$ in $\RR^\XX$,
+    %
+    \begin{multline*}
+        |T v(x)| -T w(x)|
+        \leq
+        \\
+        \beta \,
+        \max_{a \in \Gamma(x)}
+        \left| 
+            \sum_{d } v((x - d)_+ + Sa) \phi(d)
+            -
+            \sum_{d } w((x - d)_+ + Sa) \phi(d)
+        \right|
+    \end{multline*}
+    %
+
+    \Ex Use the last bound to show that
+    %
+    \begin{equation*}
+        \|T v -T w \|_\infty \leq \beta \| v - w\|_\infty
+    \end{equation*}
+    %
+
+\end{frame}
+
+
+
+\begin{frame}
+
+    Implementation, experiments:
+
+    \begin{itemize}
+        \item See the notebook \url{inventory_dp.ipynb}
+    \end{itemize}
+    
+\end{frame}
+
+
+\end{document}
