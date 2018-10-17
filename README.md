@@ -46,3 +46,5 @@ See NYU Classes
 * [Lecture 10](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture10.pdf)
 * Lecture 11 given by TJS
 * [Lecture 12](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture12.pdf)
+* [Lecture 13](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture13.pdf)
+* [Lecture 14](https://github.com/jstac/nyu_macro_fall_2018/raw/master/lectures/lecture14.pdf) -- not for assessment
